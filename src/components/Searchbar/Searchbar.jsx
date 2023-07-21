@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { Button, Form, Header, Input } from './Searchbar.styled';
 
 export const Searchbar = ({ onSubmit }) => {
   const handleSubmit = (event) => {
@@ -8,13 +10,13 @@ export const Searchbar = ({ onSubmit }) => {
   };
 
   return (
-    <header className="searchbar">
-      <form className="form" onSubmit={handleSubmit}>
-        <button type="submit" className="button">
+    <Header className="searchbar">
+      <Form className="form" onSubmit={handleSubmit}>
+        <Button type="submit" className="button">
           <span className="button-label">Search</span>
-        </button>
+        </Button>
 
-        <input
+        <Input
           className="input"
           type="text"
           name="searchQuery"
@@ -22,9 +24,12 @@ export const Searchbar = ({ onSubmit }) => {
           autoFocus
           placeholder="Search images and photos"
         />
-      </form>
-    </header>
+      </Form>
+    </Header>
   );
 };
 
 
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};
