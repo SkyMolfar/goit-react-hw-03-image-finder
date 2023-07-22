@@ -1,88 +1,86 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { Component } from 'react';
 import { Puff } from 'react-loader-spinner';
-
 
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Modal } from './Modal/Modal';
 import { Button } from './Button/Button';
+import { fetchImages } from './backendApi'; 
 
-export const App = () =>{
-  const [searchQuery, setSearchQuery] = useState('');
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+export class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      searchQuery: '',
+      images: [],
+      loading: false,
+      error: null,
+      selectedImage: null,
+      currentPage: 1,
+    };
+  }
 
-  const handleSearchSubmit = (query) => {
-    setSearchQuery(query);
-    setImages([]);
-    setError(null);
-    setLoading(true);
-    setCurrentPage(1);
+  handleSearchSubmit = (query) => {
+    this.setState({
+      searchQuery: query,
+      images: [],
+      error: null,
+      loading: true,
+      currentPage: 1,
+    });
 
-    fetchImages(query, 1);
+    this.fetchImagesFromBackend(query, 1);
   };
 
-  const fetchImages = (query, page) => {
-    axios
-      .get('https://pixabay.com/api/', {
-        params: {
-          key: '38391360-90abe6777395014beef704742', 
-          q: query,
-          image_type: 'photo',
-          per_page: 10,
-          page,
-        },
-      })
-      .then((response) => {
-        if (page === 1) {
-          setImages(response.data.hits);
-        } else {
-          setImages((prevImages) => [...prevImages, ...response.data.hits]);
-        }
-      })
-      .catch((error) => {
-        setError('Помилка при отриманні зображень');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+  fetchImagesFromBackend = async (query, page) => {
+    try {
+      const fetchedImages = await fetchImages(query, page);
+      if (page === 1) {
+        this.setState({ images: fetchedImages });
+      } else {
+        this.setState((prevState) => ({
+          images: [...prevState.images, ...fetchedImages],
+        }));
+      }
+    } catch (error) {
+      this.setState({ error: 'Помилка при отриманні зображень' });
+    } finally {
+      this.setState({ loading: false });
+    }
   };
 
- 
-  const handleImageClick = (image) => {
-    setSelectedImage(image);
+  handleImageClick = (image) => {
+    this.setState({ selectedImage: image });
   };
 
-  const handleCloseModal = () => {
-    setSelectedImage(null);
+  handleCloseModal = () => {
+    this.setState({ selectedImage: null });
   };
 
-  const handleLoadMore = () => {
-    const nextPage = currentPage + 1;
-    setCurrentPage(nextPage);
-    fetchImages(searchQuery, nextPage);
+  handleLoadMore = () => {
+    const nextPage = this.state.currentPage + 1;
+    this.setState({ currentPage: nextPage });
+    this.fetchImagesFromBackend(this.state.searchQuery, nextPage);
   };
 
-  return (
-    <div>
-      <Searchbar onSubmit={handleSearchSubmit} />
-      {loading && <Puff type="Puff" color="#00BFFF" height={100} width={100} />}
-      {error && <div>{error}</div>}
-      {images.length > 0 && (
-        <ImageGallery images={images} onImageClick={handleImageClick} />
-      )}
-      {selectedImage && (
-       <Modal onClose={handleCloseModal} image={selectedImage} />
-      )}
-      {images.length > 0 && !loading && (
-        <Button onClick={handleLoadMore}>Завантажити більше</Button>
-      )}
-    </div>
-  );
-};
+  render() {
+    const { images, loading, error, selectedImage } = this.state;
 
- 
+    return (
+      <div>
+        <Searchbar onSubmit={this.handleSearchSubmit} />
+        {loading && <Puff type="Puff" color="#00BFFF" height={100} width={100} />}
+        {error && <div>{error}</div>}
+        {images.length > 0 && (
+          <ImageGallery images={images} onImageClick={this.handleImageClick} />
+        )}
+        {selectedImage && (
+          <Modal onClose={this.handleCloseModal} image={selectedImage} />
+        )}
+        {images.length > 0 && !loading && (
+          <Button onClick={this.handleLoadMore}>Завантажити більше</Button>
+        )}
+      </div>
+    );
+  }
+}
