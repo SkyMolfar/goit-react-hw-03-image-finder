@@ -8,17 +8,14 @@ import { Button } from './Button/Button';
 import { fetchImages } from './backendApi'; 
 
 export class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      searchQuery: '',
-      images: [],
-      loading: false,
-      error: null,
-      selectedImage: null,
-      currentPage: 1,
-    };
-  }
+  state = {
+    searchQuery: '',
+    images: [],
+    loading: false,
+    error: null,
+    selectedImage: null,
+    currentPage: 1,
+  };
 
   handleSearchSubmit = (query) => {
     this.setState({
@@ -84,3 +81,4 @@ export class App extends Component {
     );
   }
 }
+

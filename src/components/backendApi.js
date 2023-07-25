@@ -10,7 +10,7 @@ export const fetchImages = async (query, page) => {
         key: apiKey,
         q: query,
         image_type: 'photo',
-        per_page: 10,
+        per_page: 12, 
         page,
       },
     });
