@@ -1,35 +1,49 @@
-import React from 'react';
+import React, { useState } from 'react';
+import SearchIcon from '@mui/icons-material/Search';
+import { toast } from 'react-toastify';
 import PropTypes from 'prop-types';
-import { Button, Form, Header, Input } from './Searchbar.styled';
+import { Header, Form, Button, Input } from './Searchbar.styled';
 
 export const Searchbar = ({ onSubmit }) => {
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const query = event.target.elements.searchQuery.value.trim();
+  const [query, setQuery] = useState('');
+
+  const handleOnChange = (e) => {
+    setQuery(e.currentTarget.value.trim().toLowerCase());
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (query === '') {
+      return toast.error('Please, enter a query and try again');
+    }
+
     onSubmit(query);
+    setQuery('');
+    e.target.reset();
   };
 
   return (
-    <Header className="searchbar">
-      <Form className="form" onSubmit={handleSubmit}>
-        <Button type="submit" className="button">
-          <span className="button-label">Search</span>
-        </Button>
-
+    <Header>
+      <Form onSubmit={handleSubmit}>
         <Input
-          className="input"
+          onChange={handleOnChange}
           type="text"
-          name="searchQuery"
           autoComplete="off"
           autoFocus
           placeholder="Search images and photos"
+          name="search"
         />
+        <Button type="submit" aria-label="Search">
+          <SearchIcon />
+        </Button>
       </Form>
     </Header>
   );
 };
 
-
 Searchbar.propTypes = {
   onSubmit: PropTypes.func.isRequired,
 };
+
+

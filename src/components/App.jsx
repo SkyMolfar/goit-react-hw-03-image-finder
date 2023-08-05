@@ -1,84 +1,108 @@
 import React, { Component } from 'react';
-import { Puff } from 'react-loader-spinner';
+import styled from 'styled-components'; 
 
-import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
-import { Modal } from './Modal/Modal';
+import { Searchbar } from './Searchbar/Searchbar';
+import  { APIservices } from './backendApi'; 
+import { ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 import { Button } from './Button/Button';
-import { fetchImages } from './backendApi'; 
+import { Modal } from './Modal/Modal';
+import { Loader } from './Loader/Loader';
+
+
+const AppContainer = styled.div`
+   display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+`;
 
 export class App extends Component {
   state = {
-    searchQuery: '',
     images: [],
-    loading: false,
+    page: 1,
+    query: '',
+    isLoading: false,
+    isError: false,
     error: null,
-    selectedImage: null,
-    currentPage: 1,
+    isShowModal: false,
+    showImage: null,
+    isShowLoadMore: false,
   };
 
-  handleSearchSubmit = (query) => {
-    this.setState({
-      searchQuery: query,
-      images: [],
-      error: null,
-      loading: true,
-      currentPage: 1,
-    });
-
-    this.fetchImagesFromBackend(query, 1);
-  };
-
-  fetchImagesFromBackend = async (query, page) => {
-    try {
-      const fetchedImages = await fetchImages(query, page);
-      if (page === 1) {
-        this.setState({ images: fetchedImages });
-      } else {
-        this.setState((prevState) => ({
-          images: [...prevState.images, ...fetchedImages],
-        }));
-      }
-    } catch (error) {
-      this.setState({ error: 'Помилка при отриманні зображень' });
-    } finally {
-      this.setState({ loading: false });
+  componentDidUpdate(_, prevState) {
+    if (prevState.query !== this.state.query || prevState.page !== this.state.page) {
+      this.getImage();
     }
+  }
+
+  async getImage() {
+    const { query, page } = this.state;
+    try {
+      const { totalHits, hits } = await APIservices.fetchImage(query, page);
+      if (totalHits === 0) {
+        return toast.error(`There are no images with query "${this.state.query}"`);
+      }
+
+      this.setState(prevState => ({
+        images: [...prevState.images, ...hits],
+        isShowLoadMore: page < Math.ceil(totalHits / 12),
+      }));
+    } catch (error) {
+      this.setState({ error: error.message, isError: true });
+    } finally {
+      this.setState({ isLoading: false });
+    }
+  }
+
+  onLoadMore = () => {
+    this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
-  handleImageClick = (image) => {
-    this.setState({ selectedImage: image });
+  setQuery = value => {
+    this.setState({
+      query: value,
+      page: 1,
+      isError: false,
+      isLoading: true,
+      images: [],
+      isShowLoadMore: false,
+    });
   };
 
-  handleCloseModal = () => {
-    this.setState({ selectedImage: null });
+  onHandleImage = image => {
+    this.setState(state => ({
+      isShowModal: !state.isShowModal,
+      showImage: image,
+    }));
   };
 
-  handleLoadMore = () => {
-    const nextPage = this.state.currentPage + 1;
-    this.setState({ currentPage: nextPage });
-    this.fetchImagesFromBackend(this.state.searchQuery, nextPage);
+  onCloseModal = () => {
+    this.setState({ isShowModal: false });
   };
 
   render() {
-    const { images, loading, error, selectedImage } = this.state;
+    const { isLoading, images, isShowLoadMore, isShowModal, showImage } = this.state;
+    const hasImages = images.length > 0;
 
     return (
-      <div>
-        <Searchbar onSubmit={this.handleSearchSubmit} />
-        {loading && <Puff type="Puff" color="#00BFFF" height={100} width={100} />}
-        {error && <div>{error}</div>}
-        {images.length > 0 && (
-          <ImageGallery images={images} onImageClick={this.handleImageClick} />
-        )}
-        {selectedImage && (
-          <Modal onClose={this.handleCloseModal} image={selectedImage} />
-        )}
-        {images.length > 0 && !loading && (
-          <Button onClick={this.handleLoadMore}>Завантажити більше</Button>
-        )}
-      </div>
+      <AppContainer>
+        <Searchbar onSubmit={this.setQuery} />
+        {isLoading && <Loader />}
+        {hasImages && <ImageGallery images={images} onHandleImage={this.onHandleImage} />}
+        <ToastContainer
+          icon={false}
+          position="top-center"
+          autoClose={2000}
+          hideProgressBar={true}
+          theme="colored"
+        />
+        {isShowLoadMore && <Button onLoadMore={this.onLoadMore} />}
+        {isShowModal && <Modal image={showImage} onCloseModal={this.onCloseModal} />}
+      </AppContainer>
     );
   }
 }
 
+ 

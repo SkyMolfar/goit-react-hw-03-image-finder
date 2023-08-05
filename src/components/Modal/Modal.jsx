@@ -1,42 +1,42 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { ModalContainer, ModalImage, Overlay } from './Modal.styled';
+import { Overlay, ModalContainer, ModalImage } from './Modal.styled';
 
-
-export const Modal = ({ onClose, image }) => {
+export const Modal = ({ image, onCloseModal }) => {
   useEffect(() => {
-    const handleKeyPress = (e) => {
+    const onEsc = (e) => {
       if (e.code === 'Escape') {
-        onClose();
+        onCloseModal();
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
+    window.addEventListener('keydown', onEsc);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener('keydown', onEsc);
     };
-  }, [onClose]);
+  }, [onCloseModal]);
 
-  const handleOverlayClick = (e) => {
+  const { largeImageURL, tags } = image;
+
+  const onClose = (e) => {
     if (e.target === e.currentTarget) {
-      onClose();
+      onCloseModal();
     }
   };
 
   return (
-    <Overlay className="overlay" onClick={handleOverlayClick}>
-      <ModalContainer className="modal">
-        <ModalImage src={image.largeImageURL} alt={image.tags} />
+    <Overlay onClick={onClose}>
+      <ModalContainer>
+        <ModalImage src={largeImageURL} alt={tags} />
       </ModalContainer>
     </Overlay>
   );
 };
- 
+
 Modal.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  image: PropTypes.shape({
-    largeImageURL: PropTypes.string.isRequired,
-    tags: PropTypes.string.isRequired,
-  }).isRequired,
+  image: PropTypes.object.isRequired,
+  onCloseModal: PropTypes.func.isRequired,
 };
+
+ 

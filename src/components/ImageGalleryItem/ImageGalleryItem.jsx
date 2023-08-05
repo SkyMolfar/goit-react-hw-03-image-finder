@@ -2,23 +2,21 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { GalleryItem, Image } from './ImageGalleryItem.styled';
 
-export const ImageGalleryItem = ({ image, onImageClick }) => {
-  const handleClick = () => {
-    onImageClick(image);
-  };
-
+export const ImageGalleryItem = ({ image, onHandleImage }) => {
   return (
-    <GalleryItem className="gallery-item" onClick={handleClick}>
-      <Image src={image.webformatURL} alt={image.tags} />
+    <GalleryItem>
+      <Image
+        src={image.webformatURL}
+        alt={image.alt}
+        onClick={() => onHandleImage(image)}
+      />
     </GalleryItem>
   );
 };
 
 ImageGalleryItem.propTypes = {
-  image: PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    webformatURL: PropTypes.string.isRequired,
-    tags: PropTypes.string.isRequired,
-  }).isRequired,
-  onImageClick: PropTypes.func.isRequired,
+  image: PropTypes.object.isRequired,
+  onHandleImage: PropTypes.func.isRequired,
 };
+
+ 
