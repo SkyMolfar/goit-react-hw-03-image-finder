@@ -1,38 +1,33 @@
-import React, { Component } from 'react';
-import styled from 'styled-components'; 
-
+import { Component } from 'react';
 import { ImageGallery } from './ImageGallery/ImageGallery';
+
 import { Searchbar } from './Searchbar/Searchbar';
-import  { APIservices } from './backendApi'; 
+import * as APIservices from '../APIservices/APIservices';
 import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { toast } from 'react-toastify';
 import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
 import { Loader } from './Loader/Loader';
-
-
-const AppContainer = styled.div`
-   display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-`;
 
 export class App extends Component {
   state = {
     images: [],
     page: 1,
     query: '',
-    isLoading: false,
-    isError: false,
+    Isloading: false,
+    IsError: false,
     error: null,
-    isShowModal: false,
+    IsShowModal: false,
     showImage: null,
     isShowLoadMore: false,
   };
 
   componentDidUpdate(_, prevState) {
-    if (prevState.query !== this.state.query || prevState.page !== this.state.page) {
+    if (
+      prevState.query !== this.state.query ||
+      prevState.page !== this.state.page
+    ) {
       this.getImage();
     }
   }
@@ -42,7 +37,9 @@ export class App extends Component {
     try {
       const { totalHits, hits } = await APIservices.fetchImage(query, page);
       if (totalHits === 0) {
-        return toast.error(`There are no images with query "${this.state.query}"`);
+        return toast.error(
+          `There are no images with query "${this.state.query}"`
+        );
       }
 
       this.setState(prevState => ({
@@ -50,9 +47,9 @@ export class App extends Component {
         isShowLoadMore: page < Math.ceil(totalHits / 12),
       }));
     } catch (error) {
-      this.setState({ error: error.message, isError: true });
+      this.setState({ error: error.message, IsError: true });
     } finally {
-      this.setState({ isLoading: false });
+      this.setState({ Isloading: false });
     }
   }
 
@@ -64,8 +61,8 @@ export class App extends Component {
     this.setState({
       query: value,
       page: 1,
-      isError: false,
-      isLoading: true,
+      IsError: false,
+      Isloading: true,
       images: [],
       isShowLoadMore: false,
     });
@@ -73,24 +70,27 @@ export class App extends Component {
 
   onHandleImage = image => {
     this.setState(state => ({
-      isShowModal: !state.isShowModal,
+      IsShowModal: !state.IsShowModal,
       showImage: image,
     }));
   };
 
   onCloseModal = () => {
-    this.setState({ isShowModal: false });
+    this.setState({ IsShowModal: false });
   };
 
   render() {
-    const { isLoading, images, isShowLoadMore, isShowModal, showImage } = this.state;
+    const { Isloading, images, isShowLoadMore, IsShowModal, showImage } =
+      this.state;
     const hasImages = images.length > 0;
 
     return (
-      <AppContainer>
+      <div>
         <Searchbar onSubmit={this.setQuery} />
-        {isLoading && <Loader />}
-        {hasImages && <ImageGallery images={images} onHandleImage={this.onHandleImage} />}
+        {Isloading && <Loader />}
+        {hasImages && (
+          <ImageGallery images={images} onHandleImage={this.onHandleImage} />
+        )}
         <ToastContainer
           icon={false}
           position="top-center"
@@ -99,10 +99,10 @@ export class App extends Component {
           theme="colored"
         />
         {isShowLoadMore && <Button onLoadMore={this.onLoadMore} />}
-        {isShowModal && <Modal image={showImage} onCloseModal={this.onCloseModal} />}
-      </AppContainer>
+        {IsShowModal && (
+          <Modal image={showImage} onCloseModal={this.onCloseModal} />
+        )}
+      </div>
     );
   }
 }
-
- 

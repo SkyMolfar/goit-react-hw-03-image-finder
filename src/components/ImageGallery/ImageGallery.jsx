@@ -1,25 +1,26 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { GalleryContainer } from './ImageGallery.styled';
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
+import css from './ImageGallery.module.css';
+import PropTypes from 'prop-types';
 
-export const ImageGallery = ({ images, onHandleImage }) => {
+function ImageGallery({ images, onHandleImage }) {
   return (
-    <GalleryContainer>
-      {images.map(image => (
-        <ImageGalleryItem
-          key={image.id}
-          image={image}
-          onHandleImage={onHandleImage}
-        />
-      ))}
-    </GalleryContainer>
+    <ul className={css.ImageGallery}>
+      {images.map(image => {
+        return (
+          <ImageGalleryItem
+            key={image.id}
+            image={image}
+            onHandleImage={onHandleImage}
+          />
+        );
+      })}
+    </ul>
   );
-};
+}
 
 ImageGallery.propTypes = {
   images: PropTypes.arrayOf(PropTypes.object).isRequired,
   onHandleImage: PropTypes.func.isRequired,
 };
 
- 
+export { ImageGallery };

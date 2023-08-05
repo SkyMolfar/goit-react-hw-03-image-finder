@@ -1,22 +1,19 @@
-import React from 'react';
+import css from './ImageGalleryItem.module.css';
 import PropTypes from 'prop-types';
-import { GalleryItem, Image } from './ImageGalleryItem.styled';
-
-export const ImageGalleryItem = ({ image, onHandleImage }) => {
+export function ImageGalleryItem({ image, onHandleImage }) {
   return (
-    <GalleryItem>
-      <Image
+    <li className={css.ImageGalleryItem}>
+      <img
         src={image.webformatURL}
         alt={image.alt}
+        className={css['ImageGalleryItem-image']}
         onClick={() => onHandleImage(image)}
       />
-    </GalleryItem>
+    </li>
   );
-};
+}
 
 ImageGalleryItem.propTypes = {
   image: PropTypes.object.isRequired,
   onHandleImage: PropTypes.func.isRequired,
 };
-
- 
